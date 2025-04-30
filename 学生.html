@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>物理作业答题系统</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .timer {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+        .student-info {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .student-info label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .student-info input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .question {
+            background-color: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .question-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #34495e;
+        }
+        .options {
+            margin-left: 20px;
+        }
+        .option {
+            margin: 8px 0;
+            cursor: pointer;
+        }
+        .option input {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .upload-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #e8f4f8;
+            display: none;
+        }
+        .correct {
+            color: #27ae60;
+        }
+        .wrong {
+            color: #e74c3c;
+        }
+        .partial {
+            color: #f39c12;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+            color: #2c3e50;
+        }
+        .feedback {
+            margin-top: 10px;
+            font-style: italic;
+        }
+        .timeout-message {
+            color: #e74c3c;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+        #previewContainer img {
+            max-width: 100%;
+            max-height: 300px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>物理作业答题系统</h1>
+    
+    <!-- 计时器 -->
+    <div class="timer" id="timer">剩余时间: 05:00</div>
+    <div class="timeout-message" id="timeoutMessage">时间已到！系统已自动提交您的答案。</div>
+    
+    <!-- 学生信息输入 -->
+    <div class="student-info">
+        <label for="studentName">学生姓名：</label>
+        <input type="text" id="studentName" placeholder="请输入您的姓名" required>
+    </div>
+    
+    <div class="instructions">
+        <p>请完成以下题目，选择正确答案后上传您的作业照片。</p>
+        <p>答题时间限制: 5分钟</p>
+        <p>单选题每题5分，多选题每题5分（全部选对得5分，漏选得3分，错选得0分）。</p>
+    </div>
+    
+    <!-- 单选题部分 -->
+    <h2>单选题（每题5分）</h2>
+    <div class="question" id="q1">
+        <div class="question-title">1. 题目1内容（学生手上有纸质版题目）</div>
+        <div class="options">
+            <div class="option"><input type="radio" name="q1" value="A"> A</div>
+            <div class="option"><input type="radio" name="q1" value="B"> B</div>
+            <div class="option"><input type="radio" name="q1" value="C"> C</div>
+            <div class="option"><input type="radio" name="q1" value="D"> D</div>
+        </div>
+        <div class="feedback" id="fb1"></div>
+    </div>
+    
+    <div class="question" id="q2">
+        <div class="question-title">2. 题目2内容</div>
+        <div class="options">
+            <div class="option"><input type="radio" name="q2" value="A"> A</div>
+            <div class="option"><input type="radio" name="q2" value="B"> B</div>
+            <div class="option"><input type="radio" name="q2" value="C"> C</div>
+            <div class="option"><input type="radio" name="q2" value="D"> D</div>
+        </div>
+        <div class="feedback" id="fb2"></div>
+    </div>
+    
+    <div class="question" id="q3">
+        <div class="question-title">3. 题目3内容</div>
+        <div class="options">
+            <div class="option"><input type="radio" name="q3" value="A"> A</div>
+            <div class="option"><input type="radio" name="q3" value="B"> B</div>
+            <div class="option"><input type="radio" name="q3" value="C"> C</div>
+            <div class="option"><input type="radio" name="q3" value="D"> D</div>
+        </div>
+        <div class="feedback" id="fb3"></div>
+    </div>
+    
+    <div class="question" id="q4">
+        <div class="question-title">4. 题目4内容</div>
+        <div class="options">
+            <div class="option"><input type="radio" name="q4" value="A"> A</div>
+            <div class="option"><input type="radio" name="q4" value="B"> B</div>
+            <div class="option"><input type="radio" name="q4" value="C"> C</div>
+            <div class="option"><input type="radio" name="q4" value="D"> D</div>
+        </div>
+        <div class="feedback" id="fb4"></div>
+    </div>
+    
+    <div class="question" id="q5">
+        <div class="question-title">5. 题目5内容</div>
+        <div class="options">
+            <div class="option"><input type="radio" name="q5" value="A"> A</div>
+            <div class="option"><input type="radio" name="q5" value="B"> B</div>
+            <div class="option"><input type="radio" name="q5" value="C"> C</div>
+            <div class="option"><input type="radio" name="q5" value="D"> D</div>
+        </div>
+        <div class="feedback" id="fb5"></div>
+    </div>
+    
+    <!-- 多选题部分 -->
+    <h2>多选题（每题5分，全部选对得5分，漏选得3分，错选得0分）</h2>
+    <div class="question" id="q6">
+        <div class="question-title">6. 题目6内容</div>
+        <div class="options">
+            <div class="option"><input type="checkbox" name="q6" value="A"> A</div>
+            <div class="option"><input type="checkbox" name="q6" value="B"> B</div>
+            <div class="option"><input type="checkbox" name="q6" value="C"> C</div>
+            <div class="option"><input type="checkbox" name="q6" value="D"> D</div>
+        </div>
+        <div class="feedback" id="fb6"></div>
+    </div>
+    
+    <div class="question" id="q7">
+        <div class="question-title">7. 题目7内容</div>
+        <div class="options">
+            <div class="option"><input type="checkbox" name="q7" value="A"> A</div>
+            <div class="option"><input type="checkbox" name="q7" value="B"> B</div>
+            <div class="option"><input type="checkbox" name="q7" value="C"> C</div>
+            <div class="option"><input type="checkbox" name="q7" value="D"> D</div>
+        </div>
+        <div class="feedback" id="fb7"></div>
+    </div>
+    
+    <div class="question" id="q8">
+        <div class="question-title">8. 题目8内容</div>
+        <div class="options">
+            <div class="option"><input type="checkbox" name="q8" value="A"> A</div>
+            <div class="option"><input type="checkbox" name="q8" value="B"> B</div>
+            <div class="option"><input type="checkbox" name="q8" value="C"> C</div>
+            <div class="option"><input type="checkbox" name="q8" value="D"> D</div>
+        </div>
+        <div class="feedback" id="fb8"></div>
+    </div>
+    
+    <!-- 作业上传部分 -->
+    <div class="upload-section">
+        <h2>作业上传</h2>
+        <p>请上传您的纸质作业照片：</p>
+        <input type="file" id="homeworkUpload" accept="image/*" capture="camera">
+        <div id="previewContainer" style="margin-top: 10px;"></div>
+    </div>
+    
+    <button id="submitBtn">提交答案</button>
+    
+    <div class="result" id="result">
+        <h2>评分结果 - <span id="studentNameDisplay"></span></h2>
+        <div class="score">总分: <span id="totalScore">0</span>/40</div>
+        <div id="detailedFeedback"></div>
+    </div>
+    
+    <script>
+        // 正确答案设置（老师需要根据实际题目修改这里）
+        const correctAnswers = {
+            q1: "A",  // 单选题1正确答案
+            q2: "B",  // 单选题2正确答案
+            q3: "C",  // 单选题3正确答案
+            q4: "D",  // 单选题4正确答案
+            q5: "A",  // 单选题5正确答案
+            q6: ["A", "B"],  // 多选题6正确答案
+            q7: ["A", "C", "D"],  // 多选题7正确答案
+            q8: ["B", "C"]   // 多选题8正确答案
+        };
+        
+        // 计时器变量
+        let timeLeft = 5 * 60; // 5分钟，以秒为单位
+        let timerInterval;
+        let isSubmitted = false;
+        
+        // 初始化计时器
+        function startTimer() {
+            // 禁用所有输入，直到学生输入姓名
+            disableAllInputs(true);
+            
+            // 当学生输入姓名后开始计时
+            document.getElementById('studentName').addEventListener('input', function() {
+                if (this.value.trim() !== '' && !timerInterval) {
+                    disableAllInputs(false);
+                    timerInterval = setInterval(updateTimer, 1000);
+                }
+            });
+        }
+        
+        // 更新计时器显示
+        function updateTimer() {
+            timeLeft--;
+            
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            
+            document.getElementById('timer').textContent = 
+                `剩余时间: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // 时间到
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('timer').textContent = "时间到!";
+                document.getElementById('timeoutMessage').style.display = 'block';
+                disableAllInputs(true);
+                submitAnswers();
+            }
+        }
+        
+        // 禁用/启用所有输入
+        function disableAllInputs(disabled) {
+            const inputs = document.querySelectorAll('input[type="radio"], input[type="checkbox"], input[type="file"], button');
+            inputs.forEach(input => {
+                input.disabled = disabled;
+            });
+            
+            // 特殊处理提交按钮
+            if (disabled) {
+                document.getElementById('submitBtn').style.backgroundColor = '#95a5a6';
+            } else {
+                document.getElementById('submitBtn').style.backgroundColor = '#3498db';
+            }
+        }
+        
+        // 图片预览
+        document.getElementById('homeworkUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const preview = document.getElementById('previewContainer');
+                    preview.innerHTML = '<img src="' + event.target.result + '" alt="作业预览">';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // 将学生数据保存到本地存储
+        function saveStudentData(studentName, score, imageData) {
+            // 获取现有数据或初始化空数组
+            const studentData = JSON.parse(localStorage.getItem('studentResults') || '[]');
+            
+            // 添加新数据
+            studentData.push({
+                name: studentName,
+                score: score,
+                image: imageData,
+                timestamp: new Date().toISOString(),
+                answers: collectStudentAnswers() // 收集学生所有答案
+            });
+            
+            // 保存回本地存储
+            localStorage.setItem('studentResults', JSON.stringify(studentData));
+        }
+        
+        // 收集学生所有答案
+        function collectStudentAnswers() {
+            const answers = {};
+            
+            // 收集单选题答案
+            for (let i = 1; i <= 5; i++) {
+                const questionName = "q" + i;
+                const selectedOption = document.querySelector(`input[name="${questionName}"]:checked`);
+                answers[questionName] = selectedOption ? selectedOption.value : null;
+            }
+            
+            // 收集多选题答案
+            for (let i = 6; i <= 8; i++) {
+                const questionName = "q" + i;
+                const selectedOptions = document.querySelectorAll(`input[name="${questionName}"]:checked`);
+                answers[questionName] = Array.from(selectedOptions).map(opt => opt.value);
+            }
+            
+            return answers;
+        }
+        
+        // 提交答案
+        function submitAnswers() {
+            if (isSubmitted) return;
+            isSubmitted = true;
+            
+            const studentName = document.getElementById('studentName').value.trim();
+            if (!studentName) {
+                document.getElementById('studentNameDisplay').textContent = "未提供姓名";
+                return;
+            }
+            
+            document.getElementById('studentNameDisplay').textContent = studentName;
+            
+            let totalScore = 0;
+            let feedbackHTML = "";
+            
+            // 检查单选题
+            for (let i = 1; i <= 5; i++) {
+                const questionName = "q" + i;
+                const selectedOption = document.querySelector(`input[name="${questionName}"]:checked`);
+                const feedbackElement = document.getElementById("fb" + i);
+                
+                if (selectedOption) {
+                    const userAnswer = selectedOption.value;
+                    if (userAnswer === correctAnswers[questionName]) {
+                        totalScore += 5;
+                        feedbackElement.innerHTML = '<span class="correct">✓ 正确 (得分: 5)</span>';
+                        feedbackElement.className = "feedback correct";
+                    } else {
+                        feedbackElement.innerHTML = `<span class="wrong">✗ 错误 (正确答案: ${correctAnswers[questionName]}, 得分: 0)</span>`;
+                        feedbackElement.className = "feedback wrong";
+                    }
+                } else {
+                    feedbackElement.innerHTML = '<span class="wrong">未作答 (得分: 0)</span>';
+                    feedbackElement.className = "feedback wrong";
+                }
+            }
+            
+            // 检查多选题（评分规则：漏选得3分，错选得0分）
+            for (let i = 6; i <= 8; i++) {
+                const questionName = "q" + i;
+                const selectedOptions = document.querySelectorAll(`input[name="${questionName}"]:checked`);
+                const feedbackElement = document.getElementById("fb" + i);
+                
+                let userAnswers = [];
+                selectedOptions.forEach(option => {
+                    userAnswers.push(option.value);
+                });
+                
+                if (userAnswers.length > 0) {
+                    const correctAns = correctAnswers[questionName];
+                    let hasWrongAnswer = false;
+                    let allCorrectSelected = true;
+                    
+                    // 检查是否有错误答案
+                    for (let ans of userAnswers) {
+                        if (!correctAns.includes(ans)) {
+                            hasWrongAnswer = true;
+                            break;
+                        }
+                    }
+                    
+                    // 检查是否所有正确答案都被选中
+                    for (let ans of correctAns) {
+                        if (!userAnswers.includes(ans)) {
+                            allCorrectSelected = false;
+                            break;
+                        }
+                    }
+                    
+                    if (hasWrongAnswer) {
+                        // 有错选得0分
+                        feedbackElement.innerHTML = `<span class="wrong">✗ 有错选 (正确答案: ${correctAns.join(", ")}, 得分: 0)</span>`;
+                        feedbackElement.className = "feedback wrong";
+                    } else if (allCorrectSelected) {
+                        // 全部选对得5分
+                        totalScore += 5;
+                        feedbackElement.innerHTML = '<span class="correct">✓ 全部正确 (得分: 5)</span>';
+                        feedbackElement.className = "feedback correct";
+                    } else {
+                        // 漏选得3分
+                        totalScore += 3;
+                        feedbackElement.innerHTML = `<span class="partial">部分正确 (漏选，正确答案: ${correctAns.join(", ")}, 得分: 3)</span>`;
+                        feedbackElement.className = "feedback partial";
+                    }
+                } else {
+                    feedbackElement.innerHTML = '<span class="wrong">未作答 (得分: 0)</span>';
+                    feedbackElement.className = "feedback wrong";
+                }
+            }
+            
+            // 显示结果
+            document.getElementById('totalScore').textContent = totalScore;
+            document.getElementById('result').style.display = 'block';
+            
+            // 处理图片并保存数据
+            const fileInput = document.getElementById('homeworkUpload');
+            if (fileInput.files.length > 0) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    saveStudentData(studentName, totalScore, event.target.result);
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                saveStudentData(studentName, totalScore, null);
+            }
+            
+            // 禁用所有输入
+            disableAllInputs(true);
+        }
+        
+        // 手动提交按钮
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            const studentName = document.getElementById('studentName').value.trim();
+            if (!studentName) {
+                alert('请输入学生姓名');
+                return;
+            }
+            submitAnswers();
+            clearInterval(timerInterval);
+            document.getElementById('timer').textContent = "已提交";
+        });
+        
+        // 页面加载后启动计时器系统
+        window.addEventListener('load', startTimer);
+    </script>
+</body>
+</html>
